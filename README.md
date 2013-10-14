@@ -3,7 +3,7 @@ jeditplugin-parsers
 
 jeditplugin-parsers
 
-All based on ANTLR, be used fot jEdit Sidekick plugin.
+All based on ANTLR4, be used with jEdit Sidekick plugin.
 
 - Javascript parser 
 	( supports function name hightlight, YUI-like document annotation)

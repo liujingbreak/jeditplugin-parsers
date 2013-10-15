@@ -109,11 +109,11 @@ WHITE_SPACE // Tab, vertical tab, form feed, space, non-breaking space and any o
 	: ('\r'|'\n'|'\t' | '\u000b' | '' |'f'| ' ' | '\u00a0'|USP)	-> skip
 	;
 fragment USP: '\u2000'..'\u200b' | '\u3000';
-LBRACE: '{';
+/* LBRACE: '{';
 RBRACE: '}';
 AT:'@';
 SiComma:';';
-COMMA:':';
+COMMA:':'; */
 MultiLineComment
     @init{
             boolean isJavaDoc = false;

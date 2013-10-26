@@ -1,47 +1,30 @@
 grammar MyCSS;
 
-options
-{
-	backtrack=false;
-	memoize=true;
-	superClass=LJBaseParser;
-	output=AST;
-}
+
 @header {
-package org.liujing.jedit.parser;
+package org.liujing.antlr.parser;
 
 import java.util.logging.*;
 import java.io.*;
-import org.liujing.parser.*;
-import org.liujing.ironsword.grammar.AntlrGrammarHandler;
 }
 @members {
     static Logger log = Logger.getLogger(MyCSSParser.class.getName());
     
     private AntlrGrammarHandler agh = null;
     
-    public void setHandler(AntlrGrammarHandler h){
-        agh = h;
-    }
-    public void addDocNode(Token start){
-        if(agh == null)
-            return;
-        int docTokenIdx = start.getTokenIndex() -1;
-        if(docTokenIdx >= 0){
-            CommonToken doct = (CommonToken) ((CommonTokenStream)input).get( start.getTokenIndex() -1);
-            if(doct.getChannel() == Token.HIDDEN_CHANNEL)
-                agh.addNode("doc", doct.getText(), doct, doct);
-        }
-    }
-}
-@rulecatch {
-    catch (RecognitionException e) {
-        reportError(e);
-        throw e;
-    }
-}
-@lexer::header {
-package org.liujing.jedit.parser;
+    //public void setHandler(AntlrGrammarHandler h){
+    //    agh = h;
+    //}
+    //public void addDocNode(Token start){
+    //    if(agh == null)
+    //        return;
+    //    int docTokenIdx = start.getTokenIndex() -1;
+    //    if(docTokenIdx >= 0){
+    //        CommonToken doct = (CommonToken) ((CommonTokenStream)input).get( start.getTokenIndex() -1);
+    //        if(doct.getChannel() == Token.HIDDEN_CHANNEL)
+    //            agh.addNode("doc", doct.getText(), doct, doct);
+    //    }
+    //}
 }
 cssfile[String fileName]
     @init{
@@ -109,26 +92,11 @@ WHITE_SPACE // Tab, vertical tab, form feed, space, non-breaking space and any o
 	: ('\r'|'\n'|'\t' | '\u000b' | '' |'f'| ' ' | '\u00a0'|USP)	-> skip
 	;
 fragment USP: '\u2000'..'\u200b' | '\u3000';
-/* LBRACE: '{';
-RBRACE: '}';
-AT:'@';
-SiComma:';';
-COMMA:':'; */
+
+DocComment:
+     '/**' .*? '*/' ('\n'|'\r')* 
+    ;
 MultiLineComment
-    @init{
-            boolean isJavaDoc = false;
-        }: '/*' 
-    {
-         if((char)input.LA(1) == '*'){
-             isJavaDoc = true;
-         }
-    }
-    .*? '*/' ('\n'|'\r')* 
-    {
-        if(isJavaDoc){
-            $channel=HIDDEN;
-        }else{
-            skip();
-        }
-    };
+    : '/*' .*? '*/' ('\n'|'\r')* -> skip
+    ;
 ANYCHAR: .;

@@ -9,8 +9,8 @@ import java.io.*;
 }
 @members {
     static Logger log = Logger.getLogger(MyCSSParser.class.getName());
-    
-    private AntlrGrammarHandler agh = null;
+    public static final int DOC_CHANN = 3;
+    //private AntlrGrammarHandler agh = null;
     
     //public void setHandler(AntlrGrammarHandler h){
     //    agh = h;
@@ -26,61 +26,65 @@ import java.io.*;
     //    }
     //}
 }
-cssfile[String fileName]
-    @init{
-        if(agh != null) {
-            agh.onRuleStart("css",$start);
-            agh.setName($fileName);
-        }
-    }
-    @after{
-        if(agh != null) agh.onRuleStop($stop);
-    }:
+cssfile
+    //@init{
+    //    if(agh != null) {
+    //        agh.onRuleStart("css",$start);
+    //        agh.setName($fileName);
+    //    }
+    //}
+    //@after{
+    //    if(agh != null) agh.onRuleStop($stop);
+    //}
+    :
     (cssUnit | cssRule)*
     ;
     
 cssRule
-    @init{
-        addDocNode($start);
-        if(agh != null) agh.onRuleStart("rule",$start);
-    }
-    @after{
-        if(agh != null) agh.onRuleStop($stop);
-    }:
-     '@' cssRuleHeader ( '{' cssUnit* '}' | ':' lessValue ';' |';')
+    //@init{
+    //    addDocNode($start);
+    //    if(agh != null) agh.onRuleStart("rule",$start);
+    //}
+    //@after{
+    //    if(agh != null) agh.onRuleStop($stop);
+    //}
+    : '@' cssRuleHeader ( '{' cssUnit* '}' | ':' lessValue ';' |';')
     ;
 lessValue:
 	(~(';'))+
 	;
 cssRuleHeader
-    @after{
-        if(agh != null) agh.setName("@"+ ruleText($start, $stop));
-    }
+    //@after{
+    //    if(agh != null) agh.setName("@"+ ruleText($start, $stop));
+    //}
     : (~('{'|':'|';'))+ ;
     
     
 cssUnit
-    @init{
-        addDocNode($start);
-        if(agh != null) agh.onRuleStart("unit",$start);
-    }
-    @after{
-        if(agh != null) agh.onRuleStop($stop);
-    }
+    //@init{
+    //    addDocNode($start);
+    //    if(agh != null) agh.onRuleStart("unit",$start);
+    //}
+    //@after{
+    //    if(agh != null) agh.onRuleStop($stop);
+    //}
     :
     selector 	'{' (cssRule| cssUnit | style)* '}'
     //selector '{' cssUnit* '}'
     ;
 selector
-    @after{ if(agh != null) agh.setName(ruleText($start, $stop)); }:
-    ~('@'|'{'|'}')(~('{'|'}'))*
+    //@after{ if(agh != null) agh.setName(ruleText($start, $stop)); }:
+    :~('@'|'{'|'}')(~('{'|'}'))*
     ;
     
 style:
 	((~('{'|'}'|'@'|';')) (~('{'|'}'|';'))* )? ';'
 	;
 	
-
+ID:
+	[^@{}]*
+	;
+	
 STRING_LITERAL: (
     '"' DOUBLE_STRING_CHARACTERS '"'
     | '\'' SINGLE_STRING_CHARACTERS '\'');
@@ -94,7 +98,7 @@ WHITE_SPACE // Tab, vertical tab, form feed, space, non-breaking space and any o
 fragment USP: '\u2000'..'\u200b' | '\u3000';
 
 DocComment:
-     '/**' .*? '*/' ('\n'|'\r')* 
+     '/**' .*? '*/' ('\n'|'\r')*  -> channel(DOC_CHANN)
     ;
 MultiLineComment
     : '/*' .*? '*/' ('\n'|'\r')* -> skip

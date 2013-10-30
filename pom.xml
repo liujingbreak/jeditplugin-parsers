@@ -93,7 +93,7 @@
 				<configuration>
 					<mainClass>org.liujing.antlr.parser.LessCssParserListener</mainClass>
 					<arguments>
-						<argument>/Users/liujing/tradeshift/repos/Workflow/src/main/apps/APCoding/components/Main/code/code.css</argument>
+						<argument>src/test/resources/less-sample1.css</argument>
 					</arguments>
 				</configuration>
 			</plugin>

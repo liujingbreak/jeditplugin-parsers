@@ -4,7 +4,7 @@ import org.liujing.ironsword.grammar.*;
 import java.util.*;
 import org.liujing.antlr.parser.*;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.*;
 import java.io.*;
 
 public class LessCssParserListener extends MyCSSBaseListener{
@@ -39,6 +39,7 @@ public class LessCssParserListener extends MyCSSBaseListener{
 	public void enterCssRule( MyCSSParser.CssRuleContext ctx) {
 		addDocNode(ctx.getStart());
 		agh.enterRule("rule",ctx);
+		agh.setName(ctx.RULE_NAME().getText());
 	}
 
 	@Override 
@@ -46,11 +47,6 @@ public class LessCssParserListener extends MyCSSBaseListener{
 		agh.exitRule(ctx);
 	}
 	
-	
-	@Override 
-	public void exitCssRuleHeader( MyCSSParser.CssRuleHeaderContext ctx) {
-		agh.setName("@"+ ctx.getText());
-	}
 
 	@Override public void enterCssUnit( MyCSSParser.CssUnitContext ctx) {
 		addDocNode(ctx.getStart());
@@ -68,9 +64,14 @@ public class LessCssParserListener extends MyCSSBaseListener{
 		MyCSSLexer lexer = new MyCSSLexer(new ANTLRFileStream(args[0], "utf-8"));
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		MyCSSParser parser = new MyCSSParser(tokens);
-		ParseTreeWalker walker = new ParseTreeWalker();
+		//ParseTreeWalker walker = new ParseTreeWalker();
 		LessCssParserListener pListener = new LessCssParserListener(tokens);
-		walker.walk(pListener, parser.cssfile());
+		ParseTree tree = parser.cssfile();
+		System.out.println(" -----start------ debug parse tree ------------");
+		System.out.println(TreePrinterUtil.stringifyTree(tree, parser));
+		//System.out.println(Trees.toStringTree(tree, parser));
+		System.out.println(" ------end----- debug parse tree ------------");
+		ParseTreeWalker.DEFAULT.walk(pListener, tree);
 		pListener.agh.getNode().setName(args[0]);
 		System.out.println(pListener.agh.getNode().toString());
 	}

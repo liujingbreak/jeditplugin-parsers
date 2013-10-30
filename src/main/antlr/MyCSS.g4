@@ -10,81 +10,35 @@ import java.io.*;
 @members {
     static Logger log = Logger.getLogger(MyCSSParser.class.getName());
     public static final int DOC_CHANN = 3;
-    //private AntlrGrammarHandler agh = null;
-    
-    //public void setHandler(AntlrGrammarHandler h){
-    //    agh = h;
-    //}
-    //public void addDocNode(Token start){
-    //    if(agh == null)
-    //        return;
-    //    int docTokenIdx = start.getTokenIndex() -1;
-    //    if(docTokenIdx >= 0){
-    //        CommonToken doct = (CommonToken) ((CommonTokenStream)input).get( start.getTokenIndex() -1);
-    //        if(doct.getChannel() == Token.HIDDEN_CHANNEL)
-    //            agh.addNode("doc", doct.getText(), doct, doct);
-    //    }
-    //}
 }
-cssfile
-    //@init{
-    //    if(agh != null) {
-    //        agh.onRuleStart("css",$start);
-    //        agh.setName($fileName);
-    //    }
-    //}
-    //@after{
-    //    if(agh != null) agh.onRuleStop($stop);
-    //}
-    :
+cssfile:
     (cssUnit | cssRule)*
     ;
     
 cssRule
-    //@init{
-    //    addDocNode($start);
-    //    if(agh != null) agh.onRuleStart("rule",$start);
-    //}
-    //@after{
-    //    if(agh != null) agh.onRuleStop($stop);
-    //}
-    : '@' cssRuleHeader ( '{' cssUnit* '}' | ':' lessValue ';' |';')
+    : RULE_NAME ~(';')*? ( '{' style* '}' | ':' lessValue )? ';'
     ;
 lessValue:
 	(~(';'))+
 	;
-cssRuleHeader
-    //@after{
-    //    if(agh != null) agh.setName("@"+ ruleText($start, $stop));
-    //}
-    : (~('{'|':'|';'))+ ;
     
-    
-cssUnit
-    //@init{
-    //    addDocNode($start);
-    //    if(agh != null) agh.onRuleStart("unit",$start);
-    //}
-    //@after{
-    //    if(agh != null) agh.onRuleStop($stop);
-    //}
-    :
-    selector 	'{' (cssRule| cssUnit | style)* '}'
-    //selector '{' cssUnit* '}'
+cssUnit :
+    selector '{' ( cssUnit | style )* '}'
     ;
 selector
-    //@after{ if(agh != null) agh.setName(ruleText($start, $stop)); }:
-    :~('@'|'{'|'}')(~('{'|'}'))*
+    : ~('{' | '}' | ';')+
     ;
     
 style:
-	((~('{'|'}'|'@'|';')) (~('{'|'}'|';'))* )? ';'
+	(~( '{' | '}' | ';' ))+  ';'
 	;
 	
 ID:
-	[^@{}]*
+	(~[@{}:; \r\n\t])+
 	;
-	
+RULE_NAME:
+	'@' ID
+	;
 STRING_LITERAL: (
     '"' DOUBLE_STRING_CHARACTERS '"'
     | '\'' SINGLE_STRING_CHARACTERS '\'');
@@ -93,7 +47,7 @@ fragment DOUBLE_STRING_CHARACTERS: (~('"'|'\\'|'\n'|'\r'|'\u2028'|'\u2029')
 fragment SINGLE_STRING_CHARACTERS:(~('\''|'\\'|'\n'|'\r'|'\u2028'|'\u2029')
         | '\\' ~('\n'|'\r'|'\u2028'|'\u2029'))*;
 WHITE_SPACE // Tab, vertical tab, form feed, space, non-breaking space and any other unicode "space separator".
-	: ('\r'|'\n'|'\t' | '\u000b' | '' |'f'| ' ' | '\u00a0'|USP)	-> skip
+	: ('\r'|'\n'|'\t' | '\u000b' | ' ' | '\u00a0'|USP)+	-> skip
 	;
 fragment USP: '\u2000'..'\u200b' | '\u3000';
 

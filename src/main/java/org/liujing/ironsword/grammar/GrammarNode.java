@@ -147,7 +147,7 @@ public class GrammarNode{
     
     public void print(int indents, PrintWriter p){
         for( int i = 0; i < indents; i++)
-            p.print("    ");
+            p.print(" | ");
         p.println(type + ": " + name + " \tL"+ getStartLine() + ",P" + getStartOffset() + " - L" + getEndLine()
             + ",P" + getEndOffset());
     }

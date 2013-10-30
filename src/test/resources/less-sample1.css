@@ -1,0 +1,121 @@
+/*
+This file is about the styling of the main components in the
+AP Coding app. In here can be found the styling of the popin
+app as well as the generic component used to present line info
+in a compact matter
+*/
+
+@import "document";
+
+app {
+	.topBar {
+		background: @darkdarker;
+		height: (@unit * 3);
+		width: 100%;
+		margin: 0;
+		padding: 0;
+		.actions {
+			float: right;
+			margin: 0;
+			padding: (@unit/2) 0 0;
+			li {
+				width: (@unit*8);
+				display: inline-block;
+				padding: 0 (@unit/2) 0 0;
+			}
+		}
+	}
+}
+
+aside {
+	.InlineHelpPanel {
+		margin: -@unit -@unit 0 -@unit;
+	}
+	/* spcific styling for the compact line representation made button */
+	.lineSelector {
+		padding: (@unit/2) @unit;
+		margin: -@unit -@unit 0 -@unit;
+		display: block;
+		background: @liteliter;
+		box-sizing: content-box;
+		.lineCompact {
+			border: 1px solid @lite;
+			margin: 0 -(@unit/2);
+			width: @unit*13.40909090909090;
+			.text {
+				border-right: 1px solid @lite;
+			}
+		}
+	}
+	/* generic styling for the input fields in the app */
+	label {
+		> span {
+			color: @activelite;
+			font-weight: 600;
+		}
+		&._textual {
+			&:after {
+				border-bottom: 1px dashed @darkdarker;
+			}
+			input {
+				color: @darkdarker;
+			}
+		}
+		&._empty {
+			&:after {
+				border-bottom: 1px dashed @litedarker;
+			}
+			input {
+				color: @litedarker;
+			}
+		}
+	}
+}
+
+/** new button - this ought to find a new home somewhere more appropriate */
+/** Overrides for compact line format in coding lines main window */
+section.grid {
+	fieldset,
+	.fieldset {
+		.mobile {
+			margin: 0 (@unit/2);
+		}
+		.lineCompact {
+			border-left: 1px solid @lite;
+			border-right: 1px solid @lite;
+			border-bottom: 1px solid @lite;
+			width: 100%;
+		}
+		&:first-child .lineCompact {
+			border-top: 1px solid @lite;
+			-webkit-border-top-left-radius: (@unit/4);
+			-webkit-border-top-right-radius: (@unit/4);
+			-moz-border-radius-topleft: (@unit/4);
+			-moz-border-radius-topright: (@unit/4);
+			border-top-left-radius: (@unit/4);
+			border-top-right-radius: (@unit/4);
+		}
+		&:last-child .lineCompact {
+			-webkit-border-bottom-left-radius: (@unit/4);
+			-webkit-border-bottom-right-radius: (@unit/4);
+			-moz-border-radius-bottomleft: (@unit/4);
+			-moz-border-radius-bottomright: (@unit/4);
+			border-bottom-left-radius: (@unit/4);
+			border-bottom-right-radius: (@unit/4);
+		}
+		label {
+			> span , input {
+				padding-left: (@unit/4);
+				padding-right: (@unit/4);
+			}
+		}
+	}
+}
+
+.fakeSelect input {
+  cursor: pointer;
+
+  &:focus {
+  	background-color: @info;
+  }
+}

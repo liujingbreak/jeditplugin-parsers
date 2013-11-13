@@ -55,6 +55,6 @@ DocComment:
      '/**' .*? '*/' ('\n'|'\r')*  -> channel(DOC_CHANN)
     ;
 MultiLineComment
-    : '/*' .*? '*/' ('\n'|'\r')* -> skip
+    : '/*' .*? '*/' ('\n'|'\r')* -> channel(DOC_CHANN)
     ;
 ANYCHAR: .;

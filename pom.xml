@@ -101,7 +101,7 @@
     </build>
     <profiles>
         <profile>
-            <id>test-less1</id>
+            <id>test-less2</id>
             <build>
                 <plugins>
                     <plugin>
@@ -111,6 +111,57 @@
                             <mainClass>org.liujing.antlr.parser.LessCssParserListener</mainClass>
                             <arguments>
                                 <argument>src/test/resources/less-sample2.css</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>test-js1</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <configuration>
+                            <mainClass>org.liujing.antlr.parser.Javascript4ParserListener</mainClass>
+                            <arguments>
+                                <argument>src/test/resources/js-sample1.js</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>test-js2</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <configuration>
+                            <mainClass>org.liujing.antlr.parser.Javascript4ParserListener</mainClass>
+                            <arguments>
+                                <argument>src/test/resources/js-sample2.js</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>test-doccomment</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <configuration>
+                            <mainClass>org.liujing.antlr.parser.DoccommentParserListener</mainClass>
+                            <arguments>
+                                <argument>src/test/resources/doclet-sample.js</argument>
                             </arguments>
                         </configuration>
                     </plugin>

@@ -3,8 +3,14 @@ package org.liujing.antlr.parser;
 import java.util.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.misc.Interval;
 
 public class TreePrinterUtil{
+	
+	public static String allText(CharStream sourceStream, Token start, Token stop){
+		return sourceStream.getText(new Interval(start.getStartIndex(), stop.getStopIndex()));
+	}
+	
 	public static String stringifyTree(ParseTree tree, Parser parser){
 		TreePrinterListener listener = new TreePrinterListener(parser);
 		ParseTreeWalker.DEFAULT.walk(listener, tree);
@@ -14,6 +20,11 @@ public class TreePrinterUtil{
 
 	private static String escapeWhitespace(String s, boolean yes){
 		return s;
+	}
+	
+	public static void verboseErrorInfo(Parser parser){
+		parser.removeErrorListeners(); // remove ConsoleErrorListener 
+		parser.addErrorListener(new VerboseListener()); // add ours
 	}
 	
 	 protected static class TreePrinterListener implements ParseTreeListener {
@@ -41,18 +52,23 @@ public class TreePrinterUtil{
 		@Override
 		public void visitErrorNode(ErrorNode node) {
 			if (builder.length() > 0) {
-				builder.append(' ');
+				builder.append(" ");
 			}
-	
+			builder.append("<error: ");
 			builder.append(escapeWhitespace(Trees.getNodeText(node, ruleNames), false));
+			builder.append(" >");
 		}
 	
 		@Override
 		public void enterEveryRule(ParserRuleContext ctx) {
 			if (builder.length() > 0) {
 				builder.append('\n');
-				for(int i = 0; i < indent; i ++)
-					builder.append(" | ");
+				if(indent > 0){
+					
+					for(int i = indent - 1; i >= 0; i --)
+						builder.append(" | ");
+					builder.append(" + ");
+				}
 			}
 	
 			//if (ctx.getChildCount() > 0) {
@@ -102,5 +118,17 @@ public class TreePrinterUtil{
 		public String toString() {
 			return builder.toString();
 		}
+	}
+	
+	public static class VerboseListener extends BaseErrorListener { 
+		@Override
+		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
+			int line, int charPositionInLine, String msg, RecognitionException e)
+		{
+			List<String> stack = ((Parser)recognizer).getRuleInvocationStack(); Collections.reverse(stack);
+			System.err.println("rule stack: "+stack);
+			System.err.println("line "+line+":"+charPositionInLine+" at "+
+			offendingSymbol+": "+msg);
+		} 
 	}
 }

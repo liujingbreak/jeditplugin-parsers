@@ -35,10 +35,12 @@ public class Antlr4GrammarHandler{
        
     }
     
+    /** for ANTLR4 listener*/
     public void enterRule(String type, ParserRuleContext ctx){
     	onRuleStart(type, ctx.getStart());
     }
     
+    /** for ANTLR4 listener*/
     public void exitRule(ParserRuleContext ctx){
     	onRuleStop(ctx.getStop());
     }

@@ -14,6 +14,10 @@ public class Javascript4ParserListener extends Javascript4BaseListener{
 	private LinkedList<Map<String, Object>> closures = new LinkedList();
 	private LinkedList< Object > stack = new LinkedList();
 	
+	private ParseTreeProperty<Object> treeValues = new ParseTreeProperty();
+	/** evaludated value from rule*/
+	private Object evalValue;
+	
 	public Javascript4ParserListener(BufferedTokenStream tokens){
 		tokenStream = tokens;
 	}
@@ -36,10 +40,48 @@ public class Javascript4ParserListener extends Javascript4BaseListener{
 
 	@Override public void exitFunctionExpression( Javascript4Parser.FunctionExpressionContext ctx) {
 		closures.pop();
-		stack.push(new JSNodeReference(agh.getNode()));
+		treeValues.put(ctx, agh.getNode());
 		agh.exitRule(ctx);
+		
+	}
+	
+	@Override public void exitLiteral( Javascript4Parser.LiteralContext ctx) {
+		
+		Object node = treeValues.removeFrom(ctx.functionExpression());
+		if(node != null)
+			treeValues.put(ctx, node);
 	}
 
+	@Override
+	public void exitVariableDeclarator(Javascript4Parser.VariableDeclaratorContext ctx){
+		String name = ctx.IDENTIFIER().getText();
+		//ctx.variableInitializer()
+	}
+	@Override
+	public void exitExpression(Javascript4Parser.ExpressionContext ctx){
+		
+	}
+	@Override public void exitPrimaryPrefix( Javascript4Parser.PrimaryPrefixContext ctx) {
+		ParserRuleContext lit = ctx.literal();
+		Object ret = null;
+		if(lit != null){
+			ret = treeValues.removeFrom(lit);
+		}else if(ctx.name() == null){
+			ret = treeValues.removeFrom(ctx.name());
+		}
+		treeValues.put(ctx, ret);
+	}
+
+	@Override
+	public void exitPrimaryExpression(Javascript4Parser.PrimaryExpressionContext ctx){
+		List<Javascript4Parser.PrimarySuffixContext> suffix = ctx.primarySuffix();
+		Object ret = treeValues.removeFrom(ctx.primaryPrefix());
+		if(suffix != null && suffix.size() > 0 && evalValue != null){
+			// other cases
+		}else{
+			treeValues.put(ctx, ret);
+		}
+	}
 	
 	public static void main(String[] args) throws Exception{
 		System.out.println("+++++++");

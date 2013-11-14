@@ -98,28 +98,9 @@ primarySuffix:
     | arguments ;
 name: (IDENTIFIER|'this') ( L* '.' L* IDENTIFIER )*;
 assignmentOperator:  '/' '=' | '=' | '*=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '>>>=' | '&=' | '^=' | '|=';
-expression:
-    assignmentExpression /* ( L* ',' L* assignmentExpression)* */
-    ;
-assignmentExpression
-    //@init{
-    //String assigner = null;
-    //}
-    //@after{
-    //
-    //}
-    : c=conditionalExpression //{ if($c.tree != null) assigner = joinPlainNodesString($c.tree); }
-    ( L* assignmentOperator L* expression
-        //{
-        //    if(handler != null){
-        //        CommonTree valueTree = (CommonTree)$v.tree;
-        //        if(valueTree.getToken()!= null && FUNCTION == valueTree.getToken().getType()
-        //            && ASSIGN == ((CommonTree)$opt.tree).getToken().getType()
-        //        )
-        //            handler.onFunctionAssign( assigner, $v.tree);
-        //    }
-        //}
-    )?
+
+expression
+    : conditionalExpression  ( L* assignmentOperator L* expression )?
     ;
 
 arguments: '(' L* (argumentList L*)? ')';
@@ -136,8 +117,8 @@ postfixExpression
 
 conditionalExpression
     : conditionalOrExpression
-    ( L* '?' L* exp=assignmentExpression
-    L* ':' L* assignmentExpression )?
+    ( L* '?' L* exp=expression
+    L* ':' L* expression )?
     ;
 
 conditionalOrExpression
@@ -153,13 +134,13 @@ multiplicativeExpression
 
 unaryExpression
     :
-     ( '+' | '-' ) L* u=unaryExpression
-    | 'typeof' L* unaryExpression
-    | 'void' L* unaryExpression
-    | 'delete' L* unaryExpression
-    | preIncrementExpression
-    | preDecrementExpression
-    | unaryExpressionNotPlusMinus
+     ( '+' | '-' ) L* unaryExpression		#addUnaryExp
+    | 'typeof' L* unaryExpression		#minusUnaryExp
+    | 'void' L* unaryExpression			#voidUnaryExp
+    | 'delete' L* unaryExpression		#delUnaryExp
+    | preIncrementExpression			#preIncreUnaryExp     
+    | preDecrementExpression          	#preDecUnaryExp
+    | unaryExpressionNotPlusMinus     	#notPlusUnaryExp
     ;
 unaryExpressionNotPlusMinus
     :

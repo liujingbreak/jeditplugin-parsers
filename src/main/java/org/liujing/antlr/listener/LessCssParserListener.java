@@ -21,7 +21,15 @@ public class LessCssParserListener extends MyCSSBaseListener{
 		List<Token> tlist = tokenStream.getHiddenTokensToLeft(i, MyCSSParser.DOC_CHANN);
 		if( tlist != null && tlist.size() > 0){
 			CommonToken doct = (CommonToken) tlist.get(0);
-			agh.addNode("doc", doct.getText(), doct, doct);
+			try{
+				Antlr4GrammarNode node = DoccommentParserListener.parse2Grammar(
+					doct.getText().trim());
+				node.setStart(doct);
+				node.setStop(doct);
+				agh.getNode().addChild(node);
+			}catch(IOException ioe){
+				throw new RuntimeException(ioe);
+			}//agh.addNode("doc", doct.getText(), doct, doct);
 		}
 	}
 	
@@ -58,6 +66,16 @@ public class LessCssParserListener extends MyCSSBaseListener{
 		agh.exitRule(ctx);
 	}
 
+	public static GrammarNode parseText(String text, String rootName){
+		MyCSSLexer lexer = new MyCSSLexer(new ANTLRInputStream(text));
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		MyCSSParser parser = new MyCSSParser(tokens);
+		LessCssParserListener pListener = new LessCssParserListener(tokens);
+		ParseTree tree = parser.cssfile();
+		ParseTreeWalker.DEFAULT.walk(pListener, tree);
+		pListener.agh.getNode().setName(rootName);
+		return pListener.agh.getNode();
+	}
 	
 	public static void main(String[] args) throws Exception{
 		System.out.println("+++++++");

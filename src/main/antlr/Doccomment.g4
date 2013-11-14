@@ -11,15 +11,15 @@ import java.io.*;
 }
 
 doc:
-	'/**'  STARS* content?  STARS*  '*/'
+	COMMENT_START ( Linebreak STARS* | content )* COMMENT_END
 	;
 	
 content: 
-	(  (anotations | desc)? Linebreak STARS* )+
+	anotations | desc
 ;
 
 desc:
-	(~(Linebreak | '*/' ))+?
+	(~(Linebreak | COMMENT_END ))+
 	;
 
 anotations:
@@ -38,5 +38,13 @@ WS:
 
 OTHER: (~(' ' | '\t' | '\n' | '\r' | '*' | '<' | '>' | '/' | '@'))+;
 
-STARS: '*'+;
-ANYCHAR: '.';
+COMMENT_START:
+	'/' ('*')+
+	;
+COMMENT_END:
+	('*')+ '/'
+	;
+STARS:
+	'*'
+	;
+ANYCHAR: .;

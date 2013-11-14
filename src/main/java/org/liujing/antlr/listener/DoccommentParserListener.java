@@ -46,10 +46,11 @@ public class DoccommentParserListener extends DoccommentBaseListener{
 	}
 	
 	public void enterDesc(DoccommentParser.DescContext ctx){
+		String desc = text(ctx.getStart(), ctx.getStop());
 		if(descBuf == null)
-			descBuf = new StringBuilder(ctx.getText());
+			descBuf = new StringBuilder(desc);
 		else
-			descBuf.append(ctx.getText());
+			descBuf.append(desc);
 		if(descToken == null)
 			descToken = ctx.getStart();
 		
@@ -59,8 +60,8 @@ public class DoccommentParserListener extends DoccommentBaseListener{
 		return TreePrinterUtil.allText(sourceStream, start, stop);
 	}
 	
-	public static Antlr4GrammarNode parse2Grammar(Reader r) throws IOException{
-		CharStream src = new ANTLRInputStream(r);
+	public static Antlr4GrammarNode parse2Grammar(String s) throws IOException{
+		CharStream src = new ANTLRInputStream(s);
 		DoccommentLexer lexer = new DoccommentLexer(src);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		DoccommentParser parser = new DoccommentParser(tokens);

@@ -22,6 +22,10 @@ public class TreePrinterUtil{
 		return s;
 	}
 	
+	public static String getRuleName(Parser parser, ParserRuleContext ctx){
+		return parser.getRuleNames()[ctx.getRuleIndex()];
+	}
+	
 	public static void verboseErrorInfo(Parser parser){
 		parser.removeErrorListeners(); // remove ConsoleErrorListener 
 		parser.addErrorListener(new VerboseListener()); // add ours

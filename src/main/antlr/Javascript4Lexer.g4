@@ -1,4 +1,4 @@
-grammar Javascript4;
+lexer grammar Javascript4Lexer;
 
 @header {
 package org.liujing.antlr.parser;
@@ -6,245 +6,53 @@ package org.liujing.antlr.parser;
 import java.util.logging.*;
 import java.io.*;
 }
-@members {
-    static Logger log = Logger.getLogger(Javascript4Parser.class.getName());
-    public static final int DOC_CHANN = 3;
+@lexer::members{
+	public static final int DOC_CHANN = 3;
+	
+	Token lastToken;
+	
+	public Token nextToken(){
+		lastToken = super.nextToken();
+		return lastToken;
+	}
+	
+	public boolean isRegexTokenStart(){
+		if(lastToken == null)
+			return true;
+		//System.out.println(" last token: "+ lastToken.getText() + ", channel:"+ getChannel()
+		//+ " _token:"+ (_token ==null ? "null": _token.getText()) );
+		switch (lastToken.getType())
+		{
+		// identifier
+			case IDENTIFIER:
+		// literals
+			case NULL_LITERAL:
+			case BOOLEAN_LITERAL:
+			case THIS:
+			case DECIMAL_LITERAL:
+			case HEX_INTEGER_LITERAL:
+			case STRING_LITERAL:
+		// member access ending 
+			case RBRACKET:
+		// function call or nested expression ending
+			case RPAREN:
+				return false;
+		// otherwise OK
+			default:
+				return true;
+		}
+	}
 }
 
-program
-    : L* blockbody? EOF;
-
-innerScript:
-    L* ('<' '!' '--' L*)?  (blockStatement L*)* ('--' '>' L*)? end=scriptEndingTag;
-
-blockStatement
-    /* @init{
-        addDocNode($start);
-    } */:  localVariableDeclaration
-    | statement ;
-
-localVariableDeclaration
-    :
-    'var' L* variableDeclarator ( L* ',' L* variableDeclarator)*;
-
-statement 
-
-:
-    labelledStatement
-    | block
-    //| emptyStatement                                // | (';')=>emptyStatement
-    | ifStatement                                  // | ('if')=>ifStatement
-    | withStatement                               // | ('with')=>withStatement
-    | switchStatement                           // | ('switch')=>switchStatement
-    | whileStatement                             // | ('while')=>whileStatement
-    | doStatement  //(L* ';')?                                // | ('do')=>doStatement
-    | forStatement                                 // | ('for')=>forStatement
-    | breakStatement  //(L* ';')?                       // | ('break')=>breakStatement
-    | continueStatement  //(L* ';')?                     // | ('continue')=>continueStatement
-    | returnStatement //(L* ';')?                         // | ('return')=>returnStatement
-    | throwStatement //(L* ';')?                            // | ('throw')=>throwStatement
-    | tryStatement                                 // | ('try')=>tryStatement
-    | expression //(L* ';')?
-    ;
-statementExpression:
-    multiplicativeExpression ( L* optsNoIn L* multiplicativeExpression)* ('++'|'--'|L* assignmentOperator L* expression)?
-;
-
-returnStatement: 'return' (expression)?;
-tryStatement: 'try' L* block
-  ( L* 'catch' L* '(' L* IDENTIFIER L* ')' L* block)*
-  ( L* 'finally' L* block )?;
-throwStatement: 'throw' L* expression ;
-breakStatement: 'break' (IDENTIFIER)? ;
-continueStatement: 'continue' (IDENTIFIER)? ;
-whileStatement: 'while' L* '(' L* expression L* ')' L* blockStatement;
-doStatement: 'do' L* blockStatement L* 'while' L* '(' L* expression L* ')';
-forStatement: 'for' L* '(' L*
-                            ( (VAR L*)? IDENTIFIER L* 'in' L* expression
-                            | (forInit L*)? ';' L* (expression L*)? ';' L* (forUpdate L*)?
-                            )
-              ')' L* blockStatement;
-forInit: localVariableDeclaration
-    | statementExpressionList
-    ;
-forUpdate
-    //@after{log.info("forupdate: "+ $forUpdate.stop);}
-    : statementExpressionList ;
-statementExpressionList: statementExpression (L* ',' L* statementExpression)*;
-//emptyStatement: ;
-labelledStatement: IDENTIFIER L* ':' L* blockStatement;
-block
-    : '{' L* blockbody?'}'
-    
-    ;
-blockbody:
-	( blockStatement L* (';' L*)* )+
-	;
-preIncrementExpression returns[String type, Object value]
-    : '++' primaryExpression 
-    ;
-preDecrementExpression returns[String type, Object value]
-    : '--' primaryExpression
-    ;
-primaryExpression
-    : primaryPrefix ( L* primarySuffix)*;
-primaryPrefix: literal
-    | '(' L* expression L* ')'
-    | allocationExpression
-    | name;
-primarySuffix:
-     '[' L* expression L* ']'
-    | '.' L* IDENTIFIER
-    | arguments ;
-name: (IDENTIFIER|'this') ( L* '.' L* IDENTIFIER )*;
-assignmentOperator:  '/' '=' | '=' | '*=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '>>>=' | '&=' | '^=' | '|=';
-
-expression
-    : conditionalExpression  ( L* assignmentOperator L* expression )?
-    ;
-
-arguments: '(' L* (argumentList L*)? ')';
-allocationExpression: 'new' L* primaryExpression;
-argumentList: expression ( L* ',' L* expression )*;
-postfixExpression
-    //@after{
-    //    $type = $p.type;
-    //    $value = $p.value;
-    //}
-    : p=primaryExpression
-    ('++'|'--')?
-    ;
-
-conditionalExpression
-    : conditionalOrExpression
-    ( L* '?' L* exp=expression
-    L* ':' L* expression )?
-    ;
-
-conditionalOrExpression
-    : m=multiplicativeExpression
-    ( L* opts L* multiplicativeExpression)*;
-
-opts: ( '||'|'&&'|'|'|'^'|'&'|'==' | '!='|'==='|'in' |'!=='|'instanceof'|'<'|'>'|'<='|'>='|'<<'|'>>'|'>>>'|'+'|'-' );
-optsNoIn: ( '||'|'&&'|'|'|'^'|'&'|'==' | '!='|'==='|'!=='|'instanceof'|'<'|'>'|'<='|'>='|'<<'|'>>'|'>>>'|'+'|'-' );
-
-multiplicativeExpression
-    : u=unaryExpression
-    (  L* ( '*' | '/' | '%' ) L*  unaryExpression )*;
-
-unaryExpression
-    :
-     ( '+' | '-' ) L* unaryExpression		#addUnaryExp
-    | 'typeof' L* unaryExpression		#minusUnaryExp
-    | 'void' L* unaryExpression			#voidUnaryExp
-    | 'delete' L* unaryExpression		#delUnaryExp
-    | preIncrementExpression			#preIncreUnaryExp     
-    | preDecrementExpression          	#preDecUnaryExp
-    | unaryExpressionNotPlusMinus     	#notPlusUnaryExp
-    ;
-unaryExpressionNotPlusMinus
-    :
-    ( '~' | '!' ) L* unaryExpression
-    | postfixExpression
-    ;
-
-variableDeclarator
-    /* @after{
-        if(handler != null){
-            if(exp != null && ((CommonTree)$exp.tree).getToken()!= null &&
-                FUNCTION ==((CommonTree)$exp.tree).getToken().getType())
-                handler.onFunctionAssign( ((CommonTree)$varid.tree).getToken().getText(),
-                $exp.tree);
-        }
-    } */
-    : IDENTIFIER (L* '=' L* exp=variableInitializer)?
-    ;
-
-variableInitializer
-    :
-    expression;
-
-literal
-    : DECIMAL_LITERAL
-    |HEX_INTEGER_LITERAL
-    |STRING_LITERAL
-    |BOOLEAN_LITERAL
-    |NULL_LITERAL
-    |functionExpression
-    |jsonExpression
-    |regularExp
-    ;
-regularExp
-    : slash='/' ( ~('/' | '\\')
-    		| '\\' '/' 
-    		| '\\' '\\'
-    		| '\\'
-    	)*
-    	'/' ( {getCurrentToken().getText().matches("[gim]+")}? IDENTIFIER)?
-    ;
-functionExpression
-	//@after{
-	//    if(handler != null)
-	//	    handler.onFunctionEnd(((CommonToken)$functionExpression.stop).getStopIndex()+1);
-	//}
-	: f='function' L* (IDENTIFIER L*)?
-    		'(' L* ( para=formalParameterList L* )? ')'
-    		/* {
-    		  if(handler != null) handler.onFunctionStart($f.getLine(),
-    		  $funcName!=null?$funcName.getText():"<func>",
-    		  $para.tree !=null? joinPlainNodesString($para.tree): "",
-    		  ((CommonToken)$functionExpression.start).getStartIndex());
-    		} */
-    		L* block
-	;
-
-
-formalParameterList: IDENTIFIER (L* ',' L* IDENTIFIER)*;
-jsonExpression: objectLiteral
-                | arrayLiteral;
-
-objectLiteral
-    /* @init{ if(handler != null) handler.onJSONStart(((CommonToken)$objectLiteral.start).getLine(), ((CommonToken)$objectLiteral.start).getStartIndex());
-    }
-    @after{
-        if(handler != null)
-            handler.onJSONEnd(((CommonToken)$objectLiteral.stop).getStopIndex()+1);
-    } */
-    : s='{'
-    L* ( propertyNameAndValueList L*)? '}';
-
-propertyNameAndValueList:
-    (propertyNameAndValue | ',') ( L* ',' ( L* propertyNameAndValue)? )* ;
-
-    //((L* ',')=> L* ',' (options{k=2;}: L* propertyNameAndValue)? )+;
-propertyNameAndValue
-    //@init{
-    //    addDocNode($start);
-    //}
-    //@after{
-    //    if(handler != null && ((CommonTree)$exp.tree).getToken() != null
-    //        && ((CommonTree)$exp.tree).getToken().getType() == FUNCTION)
-    //
-    //        handler.onJSONProperty($id.text, $id.getLine());
-    //}
-    :
-    (id=IDENTIFIER|id=STRING_LITERAL | id=DECIMAL_LITERAL | id=HEX_INTEGER_LITERAL)
-    L* ':' L* exp=conditionalExpression
-    ;
-arrayLiteral: '[' L* (arrayItems L*)? ']';
-arrayItems: (','| expression) ( L* ',' ( L* expression )? )* ;
-
-ifStatement: 'if' L* '(' L* ex=expression  L* rb=')'
-    L*  blockStatement ( L* (';' L*)? 'else' L* blockStatement )? ;
-withStatement: 'with' L* '(' L* expression L* ')' L* blockStatement ;
-switchStatement: 'switch' L* '(' L* expression L* ')' L* '{' L*
-    ( switchLabel L* (blockStatement L*)* )* '}';
-switchLabel: 'case' L* expression L* ':'
-    | 'default' L* ':';
-
 L: ('\n'|'\r'|'\u2028'|'\u2029')+;
-SLASH:'/';
-sLASHASSIGN: '/' '=';
+RegexStart:
+	'/' { isRegexTokenStart() }? -> more, pushMode(REGEX_MODE)
+	;
+SLASH: 
+	'/'
+	;
+
+
 BREAK: 'break';
 CONTINUE: 'continue';
 DELETE: 'delete';
@@ -652,9 +460,15 @@ WHITE_SPACE // Tab, vertical tab, form feed, space, non-breaking space and any o
 	;
 
 
-scriptEndingTag: ret='</' IDENTIFIER '>' ;
+
 
 fragment USP: '\u2000'..'\u200b' | '\u3000';
 //UTF8Y_HEADER: '\ubbef\u2fbf';
+BACK_SLASH: '\\';
 ANYCHAR: .;
 
+mode REGEX_MODE;
+Regex: '/' [gmi]?	-> popMode
+	;
+RegexBody: (~[/\\] | '\\' .)	-> more
+	;
